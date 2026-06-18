@@ -1,18 +1,6 @@
 import os
-import subprocess
-import sys
-
-# -----------------------------------------------------------------------------
-# AUTOMATIC DEPENDENCY CHECK (Ensures Groq & Streamlit are installed)
-# -----------------------------------------------------------------------------
-try:
-    from groq import Groq
-except ImportError:
-    # If the server is missing the library, force install it inline
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "groq"])
-    from groq import Groq
-
 import streamlit as st
+from groq import Groq
 
 # -----------------------------------------------------------------------------
 # PAGE CONFIGURATION & THEME (UI/UX)
@@ -51,10 +39,8 @@ st.markdown("""
 # -----------------------------------------------------------------------------
 # INITIALIZATION & GROQ CLIENT
 # -----------------------------------------------------------------------------
-# Checks Streamlit Secrets first, then local environment variables
 api_key = st.secrets.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
 
-# Fallback UI if the API key is not configured in the host environment
 if not api_key:
     api_key = st.sidebar.text_input(
         "🔑 Enter Groq API Key", 
@@ -64,7 +50,6 @@ if not api_key:
 
 client = None
 if api_key:
-    # Initialize the Groq Client
     client = Groq(api_key=api_key)
 
 # -----------------------------------------------------------------------------
@@ -74,7 +59,6 @@ with st.sidebar:
     st.title("⚡ Groq Options")
     st.caption("Control AI and translation behaviors")
     
-    # Selection of powerful open-source models hosted on Groq
     model_choice = st.selectbox(
         "Groq Model Engine",
         options=["llama-3.3-70b-versatile", "llama3-8b-8192"],
@@ -87,10 +71,6 @@ with st.sidebar:
         options=["Literal", "Balanced", "Creative"],
         value="Balanced"
     )
-    
-    st.write("---")
-    st.subheader("📦 Repository Layout")
-    st.info("Make sure this file is named exactly `app.py` in your main GitHub folder.")
 
 # -----------------------------------------------------------------------------
 # MAIN LAYOUT INTERFACE
@@ -98,7 +78,6 @@ with st.sidebar:
 st.title("⚡ Groq Fast Translation Workspace")
 st.markdown("Ultra-low latency translation powered by GroqCloud open-source models.")
 
-# Supported languages
 LANGUAGES = [
     "English", "Burmese", "Thai", "Vietnamese", "Japanese", 
     "Korean", "Chinese (Mandarin)", "French", "Spanish", "German"
@@ -128,7 +107,7 @@ with col2:
     )
 
 # -----------------------------------------------------------------------------
-# RUNTIME TRANSLATION LOGIC (GROQ SPECIFIC)
+# RUNTIME TRANSLATION LOGIC
 # -----------------------------------------------------------------------------
 if translate_button:
     if not client:
@@ -151,7 +130,6 @@ if translate_button:
                 
                 temp_map = {"Literal": 0.1, "Balanced": 0.4, "Creative": 0.75}
                 
-                # Groq specific chat completion endpoint
                 response = client.chat.completions.create(
                     model=model_choice,
                     messages=[
@@ -162,7 +140,6 @@ if translate_button:
                     max_tokens=2048
                 )
                 
-                # Extract text response from Groq output structure
                 translated_result = response.choices[0].message.content
                 
                 output_placeholder.markdown(
