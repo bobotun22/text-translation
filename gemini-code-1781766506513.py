@@ -3,16 +3,14 @@ import subprocess
 import sys
 
 # -----------------------------------------------------------------------------
-# AUTOMATIC DEPENDENCY CHECK (Fixes the ImportError)
+# AUTOMATIC DEPENDENCY CHECK (Ensures Groq & Streamlit are installed)
 # -----------------------------------------------------------------------------
 try:
-    from google import genai
-    from google.genai import types
+    from groq import Groq
 except ImportError:
     # If the server is missing the library, force install it inline
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "google-genai"])
-    from google import genai
-    from google.genai import types
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "groq"])
+    from groq import Groq
 
 import streamlit as st
 
@@ -20,13 +18,13 @@ import streamlit as st
 # PAGE CONFIGURATION & THEME (UI/UX)
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="AI Translation Workspace",
-    page_icon="🌐",
+    page_title="Groq AI Translation Workspace",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS styling for an elegant, distraction-free layout
+# Custom CSS styling for an elegant layout
 st.markdown("""
     <style>
     .main {
@@ -51,35 +49,37 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# INITIALIZATION & API CLIENT
+# INITIALIZATION & GROQ CLIENT
 # -----------------------------------------------------------------------------
 # Checks Streamlit Secrets first, then local environment variables
-api_key = st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
+api_key = st.secrets.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
 
 # Fallback UI if the API key is not configured in the host environment
 if not api_key:
     api_key = st.sidebar.text_input(
-        "🔑 Enter Gemini API Key", 
+        "🔑 Enter Groq API Key", 
         type="password", 
-        help="Get a key from Google AI Studio to unlock translation features."
+        help="Get a key from your GroqCloud console."
     )
 
 client = None
 if api_key:
-    client = genai.Client(api_key=api_key)
+    # Initialize the Groq Client
+    client = Groq(api_key=api_key)
 
 # -----------------------------------------------------------------------------
 # SIDEBAR CONTROLS
 # -----------------------------------------------------------------------------
 with st.sidebar:
-    st.title("⚙️ Workspace Options")
+    st.title("⚡ Groq Options")
     st.caption("Control AI and translation behaviors")
     
+    # Selection of powerful open-source models hosted on Groq
     model_choice = st.selectbox(
-        "AI Engine Profile",
-        options=["gemini-2.5-flash", "gemini-2.5-pro"],
+        "Groq Model Engine",
+        options=["llama-3.3-70b-versatile", "llama3-8b-8192"],
         index=0,
-        help="Flash offers hyper-fast responses. Pro delivers maximum reasoning power."
+        help="Llama 3.3 70B is highly accurate for translation nuances."
     )
     
     translation_tone = st.select_slider(
@@ -90,13 +90,13 @@ with st.sidebar:
     
     st.write("---")
     st.subheader("📦 Repository Layout")
-    st.info("If you still see errors, make sure this file is named exactly `app.py` in your main GitHub folder.")
+    st.info("Make sure this file is named exactly `app.py` in your main GitHub folder.")
 
 # -----------------------------------------------------------------------------
 # MAIN LAYOUT INTERFACE
 # -----------------------------------------------------------------------------
-st.title("🌐 AI Translation Workspace")
-st.markdown("Context-aware processing engine powered by Google Gemini.")
+st.title("⚡ Groq Fast Translation Workspace")
+st.markdown("Ultra-low latency translation powered by GroqCloud open-source models.")
 
 # Supported languages
 LANGUAGES = [
@@ -128,20 +128,20 @@ with col2:
     )
 
 # -----------------------------------------------------------------------------
-# RUNTIME TRANSLATION LOGIC
+# RUNTIME TRANSLATION LOGIC (GROQ SPECIFIC)
 # -----------------------------------------------------------------------------
 if translate_button:
     if not client:
-        st.error("⚠️ Active API key credentials required. Please input an API Key in the sidebar.")
+        st.error("⚠️ Active Groq API key credentials required. Please input your key in the sidebar.")
     elif not input_text.strip():
         st.warning("⚠️ Text processing cancelled: The source field is empty.")
     else:
-        with st.spinner("Analyzing context parameters and translating text..."):
+        with st.spinner("Groq is processing your translation..."):
             try:
                 system_instruction = (
                     f"You are an expert native translator translating directly into {target_lang}. "
                     f"Adhere strictly to a {translation_tone} tone structure. "
-                    "Output only the finalized clean translation results. Do not provide conversational prefaces or structural notes."
+                    "Output only the finalized clean translation results. Do not provide conversational prefaces, intro sentences, or notes."
                 )
                 
                 if source_lang != "Detect Language":
@@ -149,21 +149,26 @@ if translate_button:
                 else:
                     user_prompt = f"Identify the source language automatically and translate into {target_lang}:\n\n{input_text}"
                 
-                temp_map = {"Literal": 0.2, "Balanced": 0.5, "Creative": 0.85}
+                temp_map = {"Literal": 0.1, "Balanced": 0.4, "Creative": 0.75}
                 
-                response = client.models.generate_content(
+                # Groq specific chat completion endpoint
+                response = client.chat.completions.create(
                     model=model_choice,
-                    contents=user_prompt,
-                    config=types.GenerateContentConfig(
-                        system_instruction=system_instruction,
-                        temperature=temp_map[translation_tone],
-                    )
+                    messages=[
+                        {"role": "system", "content": system_instruction},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    temperature=temp_map[translation_tone],
+                    max_tokens=2048
                 )
                 
+                # Extract text response from Groq output structure
+                translated_result = response.choices[0].message.content
+                
                 output_placeholder.markdown(
-                    f'<div class="translation-output">{response.text}</div>', 
+                    f'<div class="translation-output">{translated_result}</div>', 
                     unsafe_allow_html=True
                 )
                 
             except Exception as error:
-                st.error(f"Runtime Processing Exception encountered: {str(error)}")
+                st.error(f"Groq Processing Exception encountered: {str(error)}")
