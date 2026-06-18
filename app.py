@@ -41,25 +41,27 @@ st.markdown("""
     /* Layout Workspace Cards */
     .workspace-card {
         background-color: #ffffff;
-        padding: 24px;
-        border-radius: 12px;
+        padding: 28px;
+        border-radius: 16px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
         border: 1px solid #e2e8f0;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
         transition: all 0.3s ease;
     }
     .workspace-card:hover {
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
     }
     
     /* Input Field & Output Frame Customization */
     .stTextArea textarea {
         font-size: 16px !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
         border: 1px solid #cbd5e1 !important;
         background-color: #ffffff !important;
         color: #334155 !important;
         transition: all 0.2s ease;
+        padding: 12px !important;
     }
     .stTextArea textarea:focus {
         border-color: #2563eb !important;
@@ -69,15 +71,16 @@ st.markdown("""
     /* Dynamic Translation Result Box */
     .translation-output-box {
         background-color: #ffffff;
-        padding: 22px;
-        border-radius: 8px;
-        border: 1px solid #cbd5e1;
-        min-height: 250px;
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        min-height: 280px;
         font-size: 16px;
-        line-height: 1.6;
+        line-height: 1.7;
         color: #0f172a;
         white-space: pre-wrap;
         transition: all 0.3s ease;
+        position: relative;
     }
     .translation-output-box:hover {
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -88,17 +91,20 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 200px;
+        height: 220px;
+        font-size: 16px;
     }
     
     /* Elegant Custom Badges */
     .badge {
         display: inline-block;
-        padding: 4px 12px;
+        padding: 6px 14px;
         border-radius: 9999px;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     .badge-primary { background-color: #e0f2fe; color: #0369a1; }
     .badge-success { background-color: #dcfce7; color: #15803d; }
@@ -109,31 +115,38 @@ st.markdown("""
     div.stButton > button:first-child {
         background-color: #2563eb !important;
         color: white !important;
-        border-radius: 8px !important;
-        padding: 12px 24px !important;
+        border-radius: 10px !important;
+        padding: 14px 28px !important;
         font-weight: 600 !important;
         border: none !important;
         box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important;
         transition: all 0.2s ease;
+        font-size: 16px;
     }
     div.stButton > button:first-child:hover {
         background-color: #1d4ed8 !important;
         box-shadow: 0 4px 12px -1px rgba(37, 99, 235, 0.3) !important;
+        transform: translateY(-1px);
     }
     
     /* Loading Spinner Customization */
     .stSpinner > div {
         border-top-color: #2563eb !important;
+        width: 50px !important;
+        height: 50px !important;
     }
     
     /* Sidebar Customization */
     .stSidebar {
         background-color: #f1f5f9;
+        border-right: 1px solid #e2e8f0;
     }
     
     /* Progress Bar */
     .stProgress > div > div {
         background-color: #2563eb !important;
+        height: 8px !important;
+        border-radius: 4px !important;
     }
     
     /* Copy Button */
@@ -141,11 +154,12 @@ st.markdown("""
         background-color: #f1f5f9 !important;
         color: #64748b !important;
         border: 1px solid #cbd5e1 !important;
-        border-radius: 6px !important;
-        padding: 6px 12px !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
         font-size: 14px !important;
         cursor: pointer;
         transition: all 0.2s ease;
+        font-weight: 500;
     }
     .copy-button:hover {
         background-color: #e2e8f0 !important;
@@ -156,14 +170,48 @@ st.markdown("""
     .status-indicator {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        margin-bottom: 8px;
+        gap: 8px;
+        margin-bottom: 10px;
     }
     
     /* Language Selector Styling */
     .stSelectbox {
-        border-radius: 8px !important;
+        border-radius: 10px !important;
         border: 1px solid #cbd5e1 !important;
+        font-size: 15px !important;
+        padding: 8px 12px !important;
+    }
+    
+    /* Translation Info Bar */
+    .translation-info {
+        background-color: #f8fafc;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        color: #64748b;
+    }
+    
+    /* Success Animation */
+    @keyframes success-pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    .success-animation {
+        animation: success-pulse 0.5s ease;
+    }
+    
+    /* Character Counter */
+    .char-counter {
+        font-size: 12px;
+        color: #94a3b8;
+        text-align: right;
+        margin-top: 4px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -219,11 +267,11 @@ with st.sidebar:
 # -----------------------------------------------------------------------------
 # Header with logo and title
 st.markdown("""
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-        <span style="font-size: 28px;">✨</span>
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+        <span style="font-size: 32px;">✨</span>
         <div>
-            <h1 style="margin: 0; padding: 0;">Lumina Translate AI</h1>
-            <p style="margin: 0; color: #64748b; font-size: 14px;">Enterprise-grade low latency translation infrastructure</p>
+            <h1 style="margin: 0; padding: 0; font-size: 28px;">Lumina Translate AI</h1>
+            <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 14px;">Enterprise-grade low latency translation infrastructure</p>
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -247,9 +295,16 @@ with col1:
     
     input_text = st.text_area(
         "Content Entry Frame", 
-        height=250, 
-        placeholder="Type, drop, or paste standard text content here to parse translation..."
+        height=280, 
+        placeholder="Type, drop, or paste standard text content here to parse translation...",
+        key="input_text"
     )
+    
+    # Character counter
+    if input_text:
+        char_count = len(input_text)
+        st.markdown(f'<div class="char-counter">Characters: {char_count}</div>', unsafe_allow_html=True)
+    
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
@@ -257,6 +312,14 @@ with col2:
     st.markdown('<span class="badge badge-success">FINALIZED TRANSLATION</span>', unsafe_allow_html=True)
     
     target_lang = st.selectbox("Target Target Language", [lang for lang in LANGUAGES if lang != source_lang], index=0)
+    
+    # Translation info bar
+    st.markdown(f'''
+        <div class="translation-info">
+            <span>Model: {model_choice}</span>
+            <span>Style: {translation_tone}</span>
+        </div>
+    ''', unsafe_allow_html=True)
     
     # Action Controller Execution Trigger
     translate_button = st.button("🚀 Process Translation Pipeline", use_container_width=True)
@@ -282,6 +345,12 @@ if translate_button:
     else:
         with st.spinner("Processing pipeline sequence optimization inputs..."):
             try:
+                # Show progress bar
+                progress_bar = st.progress(0)
+                for i in range(100):
+                    time.sleep(0.01)
+                    progress_bar.progress(i + 1)
+                
                 # System design context payload guidelines
                 system_instruction = (
                     f"You are an elite linguistic engine. Translate text explicitly into {target_lang}. "
@@ -308,11 +377,14 @@ if translate_button:
                 
                 translated_result = response.choices[0].message.content.strip()
                 
+                # Hide progress bar
+                progress_bar.empty()
+                
                 # Render beautifully formatted text blocks container
                 output_placeholder.markdown(
                     f'''
-                    <div class="translation-output-box">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div class="translation-output-box success-animation">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                             <span style="font-size: 14px; color: #64748b;">Translation Result</span>
                             <button class="copy-button" onclick="navigator.clipboard.writeText('{translated_result.replace("'", "\\'")}'); this.textContent='✓ Copied!'; setTimeout(() => this.textContent='📋 Copy', 2000);">
                                 📋 Copy
@@ -325,4 +397,5 @@ if translate_button:
                 )
                 
             except Exception as error:
+                progress_bar.empty()
                 st.error(f"Engine Runtime Exception encountered: {str(error)}")
