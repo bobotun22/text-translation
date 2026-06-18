@@ -1,6 +1,17 @@
 import os
+import sys
+
+# -----------------------------------------------------------------------------
+# FOOLPROOF DEPENDENCY LOADER
+# -----------------------------------------------------------------------------
+try:
+    from groq import Groq
+except ImportError:
+    # Safely install groq using the running python executable system path
+    os.system(f"{sys.executable} -m pip install groq")
+    from groq import Groq
+
 import streamlit as st
-from groq import Groq
 
 # -----------------------------------------------------------------------------
 # PAGE CONFIGURATION & THEME (UI/UX)
@@ -37,10 +48,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# INITIALIZATION & GROQ CLIENT
+# INITIALIZATION & GROQ CLIENT (SECURED)
 # -----------------------------------------------------------------------------
-api_key = st.secrets.get("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)
+# This looks for a secret named "GROQ_API_KEY" in your Streamlit Cloud Secrets
+api_key = st.secrets.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
 
+# Fallback sidebar input if the secret is not saved
 if not api_key:
     api_key = st.sidebar.text_input(
         "🔑 Enter Groq API Key", 
@@ -111,7 +124,7 @@ with col2:
 # -----------------------------------------------------------------------------
 if translate_button:
     if not client:
-        st.error("⚠️ Active Groq API key credentials required. Please input your key in the sidebar.")
+        st.error("⚠️ Active Groq API key credentials required. Please input your key in the sidebar or configure Secrets.")
     elif not input_text.strip():
         st.warning("⚠️ Text processing cancelled: The source field is empty.")
     else:
