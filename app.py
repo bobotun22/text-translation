@@ -39,7 +39,7 @@ st.markdown("""
 # -----------------------------------------------------------------------------
 # INITIALIZATION & GROQ CLIENT
 # -----------------------------------------------------------------------------
-api_key = st.secrets.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
+api_key = st.secrets.get("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)
 
 if not api_key:
     api_key = st.sidebar.text_input(
