@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+from datetime import datetime
 
 # -----------------------------------------------------------------------------
 # FOOLPROOF DEPENDENCY LOADER
@@ -28,6 +30,7 @@ st.markdown("""
     /* Global Background and Typography Framework */
     .stApp {
         background-color: #f8fafc;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     h1, h2, h3 {
         color: #0f172a !important;
@@ -43,6 +46,10 @@ st.markdown("""
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
         border: 1px solid #e2e8f0;
         margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    .workspace-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
     
     /* Input Field & Output Frame Customization */
@@ -70,6 +77,10 @@ st.markdown("""
         line-height: 1.6;
         color: #0f172a;
         white-space: pre-wrap;
+        transition: all 0.3s ease;
+    }
+    .translation-output-box:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     .translation-empty-state {
         color: #94a3b8;
@@ -91,6 +102,8 @@ st.markdown("""
     }
     .badge-primary { background-color: #e0f2fe; color: #0369a1; }
     .badge-success { background-color: #dcfce7; color: #15803d; }
+    .badge-warning { background-color: #fef3c7; color: #92400e; }
+    .badge-error { background-color: #fee2e2; color: #b91c1c; }
     
     /* Action Button Adjustments */
     div.stButton > button:first-child {
@@ -106,6 +119,51 @@ st.markdown("""
     div.stButton > button:first-child:hover {
         background-color: #1d4ed8 !important;
         box-shadow: 0 4px 12px -1px rgba(37, 99, 235, 0.3) !important;
+    }
+    
+    /* Loading Spinner Customization */
+    .stSpinner > div {
+        border-top-color: #2563eb !important;
+    }
+    
+    /* Sidebar Customization */
+    .stSidebar {
+        background-color: #f1f5f9;
+    }
+    
+    /* Progress Bar */
+    .stProgress > div > div {
+        background-color: #2563eb !important;
+    }
+    
+    /* Copy Button */
+    .copy-button {
+        background-color: #f1f5f9 !important;
+        color: #64748b !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding: 6px 12px !important;
+        font-size: 14px !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .copy-button:hover {
+        background-color: #e2e8f0 !important;
+        color: #475569 !important;
+    }
+    
+    /* Status Indicators */
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+    
+    /* Language Selector Styling */
+    .stSelectbox {
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -154,13 +212,22 @@ with st.sidebar:
     if client:
         st.markdown('<span class="badge badge-success">● Engine Connected</span>', unsafe_allow_html=True)
     else:
-        st.markdown('<span class="badge badge-primary">○ Awaiting Key Input</span>', ... , unsafe_allow_html=True)
+        st.markdown('<span class="badge badge-primary">○ Awaiting Key Input</span>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # CORE MAIN APPLICATION WORKSPACE
 # -----------------------------------------------------------------------------
-st.title("✨ Lumina Translate AI")
-st.markdown("Enterprise-grade low latency translation infrastructure utilizing high-parameter open models.")
+# Header with logo and title
+st.markdown("""
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+        <span style="font-size: 28px;">✨</span>
+        <div>
+            <h1 style="margin: 0; padding: 0;">Lumina Translate AI</h1>
+            <p style="margin: 0; color: #64748b; font-size: 14px;">Enterprise-grade low latency translation infrastructure</p>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
 st.write("")
 
 LANGUAGES = [
@@ -243,7 +310,17 @@ if translate_button:
                 
                 # Render beautifully formatted text blocks container
                 output_placeholder.markdown(
-                    f'<div class="translation-output-box">{translated_result}</div>', 
+                    f'''
+                    <div class="translation-output-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 14px; color: #64748b;">Translation Result</span>
+                            <button class="copy-button" onclick="navigator.clipboard.writeText('{translated_result.replace("'", "\\'")}'); this.textContent='✓ Copied!'; setTimeout(() => this.textContent='📋 Copy', 2000);">
+                                📋 Copy
+                            </button>
+                        </div>
+                        {translated_result}
+                    </div>
+                    ''', 
                     unsafe_allow_html=True
                 )
                 
