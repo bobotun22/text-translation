@@ -1,7 +1,20 @@
 import os
+import subprocess
+import sys
+
+# -----------------------------------------------------------------------------
+# AUTOMATIC DEPENDENCY CHECK (Fixes the ImportError)
+# -----------------------------------------------------------------------------
+try:
+    from google import genai
+    from google.genai import types
+except ImportError:
+    # If the server is missing the library, force install it inline
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "google-genai"])
+    from google import genai
+    from google.genai import types
+
 import streamlit as st
-from google import genai
-from google.genai import types
 
 # -----------------------------------------------------------------------------
 # PAGE CONFIGURATION & THEME (UI/UX)
@@ -53,7 +66,6 @@ if not api_key:
 
 client = None
 if api_key:
-    # Initializing the modern standard Client
     client = genai.Client(api_key=api_key)
 
 # -----------------------------------------------------------------------------
@@ -63,15 +75,13 @@ with st.sidebar:
     st.title("⚙️ Workspace Options")
     st.caption("Control AI and translation behaviors")
     
-    # Model configuration choice
     model_choice = st.selectbox(
         "AI Engine Profile",
         options=["gemini-2.5-flash", "gemini-2.5-pro"],
         index=0,
-        help="Flash offers hyper-fast responses. Pro delivers maximum reasoning power for long documents."
+        help="Flash offers hyper-fast responses. Pro delivers maximum reasoning power."
     )
     
-    # Context tone selection
     translation_tone = st.select_slider(
         "Stylistic Tone",
         options=["Literal", "Balanced", "Creative"],
@@ -79,14 +89,8 @@ with st.sidebar:
     )
     
     st.write("---")
-    st.subheader("📦 Repository & Deployment")
-    st.markdown("""
-    **To deploy this workspace via GitHub:**
-    1. Create a GitHub repo and add this file as `app.py`.
-    2. Add a `requirements.txt` file listing your dependencies.
-    3. Link the repository directly on **Streamlit Community Cloud**.
-    """)
-    st.link_button("🌐 Connect via GitHub", "https://github.com", use_container_width=True)
+    st.subheader("📦 Repository Layout")
+    st.info("If you still see errors, make sure this file is named exactly `app.py` in your main GitHub folder.")
 
 # -----------------------------------------------------------------------------
 # MAIN LAYOUT INTERFACE
@@ -94,13 +98,12 @@ with st.sidebar:
 st.title("🌐 AI Translation Workspace")
 st.markdown("Context-aware processing engine powered by Google Gemini.")
 
-# Supported core languages
+# Supported languages
 LANGUAGES = [
     "English", "Burmese", "Thai", "Vietnamese", "Japanese", 
     "Korean", "Chinese (Mandarin)", "French", "Spanish", "German"
 ]
 
-# Structural 2-column distribution layout
 col1, col2 = st.columns(2, gap="large")
 
 with col1:
@@ -116,10 +119,8 @@ with col2:
     st.markdown("### 📤 Output Translation")
     target_lang = st.selectbox("To language:", [lang for lang in LANGUAGES if lang != source_lang], index=0)
     
-    # Operational Action Trigger Button
     translate_button = st.button("🚀 Process Translation", type="primary", use_container_width=True)
     
-    # Clean output state management container
     output_placeholder = st.empty()
     output_placeholder.markdown(
         '<div class="translation-output" style="color: #a0aec0; font-style: italic;">Processed output will populate here...</div>', 
@@ -131,29 +132,25 @@ with col2:
 # -----------------------------------------------------------------------------
 if translate_button:
     if not client:
-        st.error("⚠️ Active API key credentials required. Please input a valid API Key to initialize the client.")
+        st.error("⚠️ Active API key credentials required. Please input an API Key in the sidebar.")
     elif not input_text.strip():
         st.warning("⚠️ Text processing cancelled: The source field is empty.")
     else:
         with st.spinner("Analyzing context parameters and translating text..."):
             try:
-                # System configuration instructions to eliminate conversational dialogue from the AI response
                 system_instruction = (
                     f"You are an expert native translator translating directly into {target_lang}. "
                     f"Adhere strictly to a {translation_tone} tone structure. "
-                    "Output only the finalized clean translation results. Do not provide conversational prefaces, feedback, or notes."
+                    "Output only the finalized clean translation results. Do not provide conversational prefaces or structural notes."
                 )
                 
-                # Context parsing based on language detection settings
                 if source_lang != "Detect Language":
                     user_prompt = f"Translate the text accurately from {source_lang} to {target_lang}:\n\n{input_text}"
                 else:
                     user_prompt = f"Identify the source language automatically and translate into {target_lang}:\n\n{input_text}"
                 
-                # Dynamic mapping of the temperature configuration based on structural preference
                 temp_map = {"Literal": 0.2, "Balanced": 0.5, "Creative": 0.85}
                 
-                # Running client execution matching current GenAI specifications
                 response = client.models.generate_content(
                     model=model_choice,
                     contents=user_prompt,
@@ -163,7 +160,6 @@ if translate_button:
                     )
                 )
                 
-                # Update UI container gracefully with structural result text
                 output_placeholder.markdown(
                     f'<div class="translation-output">{response.text}</div>', 
                     unsafe_allow_html=True
